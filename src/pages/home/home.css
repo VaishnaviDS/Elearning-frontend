@@ -1,0 +1,54 @@
+.home {
+  background-color: #f5f5f5;
+  background-image: url('/assets/wave.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+  text-align: center;
+}
+
+.home-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.hero-row h1 {
+  font-size: 36px;
+  margin: 0;
+}
+
+.hero-img {
+  width: 180px;
+}
+
+.home-content p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.home-content button {
+  padding: 12px 24px;
+}
+
+@media (max-width: 768px) {
+  .hero-row {
+    flex-direction: column;
+  }
+  .hero-row h1 {
+    font-size: 28px;
+  }
+  .home-content p {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,27 @@
+.profile {
+  max-width: 450px;
+  margin: 130px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.profile h2 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.profile-info p {
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.profile-info strong {
+  font-weight: 600;
+}
+
+

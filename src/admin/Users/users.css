@@ -1,0 +1,72 @@
+.users {
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.users h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+  background-color: #2e86de;
+  color: white;
+}
+
+thead td {
+  padding: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+tbody td {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  color: #333;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+@media (max-width: 768px) {
+  table, thead, tbody, td, tr {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  td {
+    position: relative;
+    padding-left: 50%;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  td::before {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #666;
+  }
+
+  td:nth-of-type(1)::before { content: "#"; }
+  td:nth-of-type(2)::before { content: "Name"; }
+  td:nth-of-type(3)::before { content: "Email"; }
+}
