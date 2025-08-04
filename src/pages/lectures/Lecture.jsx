@@ -152,7 +152,7 @@ const Lecture = ({ user }) => {
                         src={`${server}/${lecture.file}`}
                         width="100%"
                         controls
-                        controlsList="nodownload nofullscreen"
+                        controlsList="nodownload fullscreen"
                         disablePictureInPicture
                         disableRemotePlayback
                       />
