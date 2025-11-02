@@ -4,26 +4,40 @@ import axios from "axios";
 import { server } from "../../main";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/loading/Loading";
-import { UserData } from "../../context/UserContext"; // ✅ Assuming you use this context
+import { UserData } from "../../context/UserContext";
 
 const Testimonials = () => {
   const [topTestimonials, setTopTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { user } = UserData(); // ✅ Get logged-in user from context
+  const { user } = UserData();
+
+  // ✅ Fetch testimonials (used on mount and refresh)
+  const fetchTopTestimonials = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${server}/api/testimonials/top4`);
+      const validTestimonials = (data.testimonials || []).filter(
+        (t) => t.course && t.user
+      ); // ignore testimonials with deleted course/user
+      setTopTestimonials(validTestimonials);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTopTestimonials = async () => {
-      try {
-        const { data } = await axios.get(`${server}/api/testimonials/top4`);
-        setTopTestimonials(data.testimonials || []);
-      } catch (error) {
-        console.error("Error fetching testimonials:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTopTestimonials();
+
+    // ✅ Refresh testimonials when a course is deleted (admin triggers this event)
+    const handleRefresh = () => fetchTopTestimonials();
+    window.addEventListener("testimonialsUpdated", handleRefresh);
+
+    return () => {
+      window.removeEventListener("testimonialsUpdated", handleRefresh);
+    };
   }, []);
 
   if (loading) return <Loading />;
@@ -36,7 +50,10 @@ const Testimonials = () => {
 
       <div className="testimonial-grid">
         {topTestimonials.map((t, i) => (
-          <div className="testimonial-card" key={i}>
+          <div
+            className="testimonial-card fade-in"
+            key={t._id || i}
+          >
             <div className="student-image">
               <img
                 src={
