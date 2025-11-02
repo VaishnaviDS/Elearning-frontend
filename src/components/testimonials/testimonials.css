@@ -1,38 +1,51 @@
 .testimonials {
-  padding: 80px 0;
   text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(180deg, #f9fafc, #eef1f7);
 }
 
-.testimonials h2 {
-  font-size: 32px;
-  color: black;
-  margin-bottom: 30px;
+.section-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #333;
+  position: relative;
 }
 
-.testimonials-cards {
-  display: flex;
-  flex-wrap: wrap;
+.section-title::after {
+  content: "";
+  width: 80px;
+  height: 4px;
+  background: #007bff;
+  display: block;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 25px;
   justify-content: center;
-  gap: 30px;
+  align-items: stretch;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .testimonial-card {
-  background-color: white;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
-  text-align: left;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-@media (max-width: 768px) {
-  .testimonial-card {
-    width: 80%;
-    text-align: center;
-  }
+.testimonial-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
 .student-image img {
@@ -40,26 +53,48 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 10px;
+  border: 3px solid #007bff;
+  margin-bottom: 15px;
 }
 
 .message {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 10px;
+  font-style: italic;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+  min-height: 60px;
 }
 
-.info {
-  text-align: center;
-}
-
-.name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+.info .name {
+  font-weight: 600;
+  color: #222;
   margin-bottom: 5px;
 }
 
-.position {
-  font-size: 14px;
+.info .position {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.explore-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #007bff;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.explore-btn:hover {
+  background: #0056b3;
+}
+
+.no-testimonials {
+  text-align: center;
+  padding: 40px;
+  color: #777;
+  font-size: 1.1rem;
 }

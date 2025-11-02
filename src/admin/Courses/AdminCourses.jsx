@@ -37,6 +37,21 @@ const AdminCourses = ({ user }) => {
   const [imagePrev, setImagePrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
 
+  // 🧩 Reset form after submit or cancel
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setCategory("");
+    setPrice("");
+    setCreatedBy("");
+    setDuration("");
+    setImage(null);
+    setImagePrev("");
+    setEditCourse(null);
+    setViewCourse(null);
+  };
+
+  // 🧩 Image preview
   const changeImageHandler = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -47,60 +62,75 @@ const AdminCourses = ({ user }) => {
     };
   };
 
+  // 🧩 Submit handler
   const submitHandler = async (e) => {
     e.preventDefault();
     setBtnLoading(true);
 
-    const myForm = new FormData();
-    myForm.append("title", title);
-    myForm.append("description", description);
-    myForm.append("category", category);
-    myForm.append("price", price);
-    myForm.append("createdBy", createdBy);
-    myForm.append("duration", duration);
-    if (image) myForm.append("file", image);
-
     try {
-      let response;
+      let uploadedImageUrl = null;
 
+      if (image) {
+        // 1️⃣ Get Cloudinary signature
+        const sigRes = await axios.get(`${server}/api/cloudinary-signature`, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        const { signature, timestamp, apiKey, cloudName } = sigRes.data;
+
+        // 2️⃣ Upload image to Cloudinary
+        const formDataCloud = new FormData();
+        formDataCloud.append("file", image);
+        formDataCloud.append("api_key", apiKey);
+        formDataCloud.append("timestamp", timestamp);
+        formDataCloud.append("signature", signature);
+
+        const uploadRes = await axios.post(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          formDataCloud
+        );
+
+        uploadedImageUrl = uploadRes.data.secure_url;
+      }
+
+      // 3️⃣ Send data to backend
+      const payload = {
+        title,
+        description,
+        category,
+        price,
+        createdBy,
+        duration,
+        image: uploadedImageUrl || (editCourse ? editCourse.image : ""),
+      };
+
+      let response;
       if (editCourse) {
-        response = await axios.put(`${server}/api/course/${editCourse._id}`, myForm, {
-          headers: { token: localStorage.getItem("token") }
+        response = await axios.put(`${server}/api/course/${editCourse._id}`, payload, {
+          headers: { token: localStorage.getItem("token") },
         });
       } else {
-        response = await axios.post(`${server}/api/course/new`, myForm, {
-          headers: { token: localStorage.getItem("token") }
+        response = await axios.post(`${server}/api/course/new`, payload, {
+          headers: { token: localStorage.getItem("token") },
         });
       }
 
       toast.success(response.data.message);
       await fetchCourses();
-
-      // Reset form
       resetForm();
     } catch (error) {
+      console.error(error);
       toast.error(error.response?.data?.message || "Failed to submit course");
+    } finally {
       setBtnLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setImage(null);
-    setTitle("");
-    setDescription("");
-    setDuration("");
-    setImagePrev("");
-    setCategory("");
-    setCreatedBy("");
-    setPrice("");
-    setEditCourse(null);
-    setBtnLoading(false);
-  };
-
+  // 🧩 Filter courses for search
   const filteredCourses = courses?.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // 🧩 Edit course handler
   const handleEditClick = (course) => {
     setViewCourse(null);
     setEditCourse(course);
@@ -111,7 +141,7 @@ const AdminCourses = ({ user }) => {
     setCreatedBy(course.createdBy);
     setDuration(course.duration);
     setImage(null);
-    setImagePrev(`${server}/${course.image}`);
+    setImagePrev(course.image); // ✅ direct Cloudinary URL (not server path)
   };
 
   return (
@@ -130,10 +160,14 @@ const AdminCourses = ({ user }) => {
             {filteredCourses && filteredCourses.length > 0 ? (
               filteredCourses.map(course => (
                 <div key={course._id} className="course-list-item">
-                  <span onClick={() => {
-                    setEditCourse(null);
-                    setViewCourse(course);
-                  }}>{course.title}</span>
+                  <span
+                    onClick={() => {
+                      setEditCourse(null);
+                      setViewCourse(course);
+                    }}
+                  >
+                    {course.title}
+                  </span>
 
                   <span>₹{course.price}</span>
 

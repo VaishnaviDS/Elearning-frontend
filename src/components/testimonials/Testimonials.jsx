@@ -1,67 +1,74 @@
-import React from 'react'
-import "./testimonials.css"
+import React, { useEffect, useState } from "react";
+import "./testimonials.css";
+import axios from "axios";
+import { server } from "../../main";
+import { useNavigate } from "react-router-dom";
+import Loading from "../../components/loading/Loading";
+import { UserData } from "../../context/UserContext"; // ✅ Assuming you use this context
 
 const Testimonials = () => {
-const testimonialsData = [
-  {
-    id: 1,
-    name: "Aarav Mehta",
-    position: "B.Tech - Computer Science",
-    message:
-      "The platform's hands-on projects and real-world case studies gave me practical experience that really boosted my confidence.",
-    image:
-      "https://th.bing.com/th?q=Current+Bachelor&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.3&pid=InlineBlock&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
-  },
-  {
-    id: 2,
-    name: "Sneha Reddy",
-    position: "MBA Student",
-    message:
-      "The interactive content and easy explanations made even the most complex topics feel approachable. Highly recommended!",
-    image:
-      "https://th.bing.com/th/id/OIP.GKAiW3oc2TWXVEeZAzrWOAHaJF?w=135&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-  },
-  {
-    id: 3,
-    name: "Vikram Singh",
-    position: "M.Sc Data Science",
-    message:
-      "What I loved most was the mentorship. I could ask questions and get guidance at any step of the learning process.",
-    image:
-      "https://th.bing.com/th?q=Current+Bachelor&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.3&pid=InlineBlock&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
-  },
-  {
-    id: 4,
-    name: "Nikita Verma",
-    position: "Engineering Graduate",
-    message:
-      "This platform helped me prepare for my campus placements with mock interviews and resume-building tips. Super helpful!",
-    image:
-      "https://th.bing.com/th/id/OIP.GKAiW3oc2TWXVEeZAzrWOAHaJF?w=135&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-  },
-];
+  const [topTestimonials, setTopTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user } = UserData(); // ✅ Get logged-in user from context
+
+  useEffect(() => {
+    const fetchTopTestimonials = async () => {
+      try {
+        const { data } = await axios.get(`${server}/api/testimonials/top4`);
+        setTopTestimonials(data.testimonials || []);
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopTestimonials();
+  }, []);
+
+  if (loading) return <Loading />;
+  if (topTestimonials.length === 0)
+    return <h3 className="no-testimonials">No testimonials yet.</h3>;
 
   return (
-    <section className='testimonials'>
-        <h2>What our students say</h2>
-        <div className='testimonials-cards'>
-        {
-            testimonialsData.map((e)=>(
-                <div className='testimonial-card' key={e.id}>
-                    <div className='student-image'>
-                        <img src={e.image} alt=''/>
-                    </div>
-                    <p className='message'>{e.message}</p>
-                    <div className='info'>
-                        <p className='name'>{e.name}</p>
-                        <p className='position'>{e.position}</p>
-                    </div>
-                </div>
-            ))
-        }
-        </div>
-    </section>
-  )
-}
+    <section className="testimonials">
+      <h2 className="section-title">What Our Students Say</h2>
 
-export default Testimonials
+      <div className="testimonial-grid">
+        {topTestimonials.map((t, i) => (
+          <div className="testimonial-card" key={i}>
+            <div className="student-image">
+              <img
+                src={
+                  t.user?.avatar ||
+                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                }
+                alt={t.user?.name || "student"}
+              />
+            </div>
+
+            <p className="message">“{t.comment}”</p>
+
+            <div className="info">
+              <p className="name">{t.user?.name}</p>
+              <p className="position">⭐ {t.rating}/5</p>
+            </div>
+
+            <button
+              onClick={() =>
+                user?.role === "admin"
+                  ? navigate(`/course/study/${t.course?._id}`)
+                  : navigate(`/course/${t.course?._id}`)
+              }
+              className="explore-btn"
+            >
+              Explore {t.course?.title}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default Testimonials;

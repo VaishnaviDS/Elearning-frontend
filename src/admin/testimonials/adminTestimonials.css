@@ -1,0 +1,46 @@
+.admin-testimonials {
+  padding: 20px;
+  width: 100%;
+}
+
+.admin-testimonials h1 {
+  margin-bottom: 20px;
+  color: #222;
+  font-size: 1.8rem;
+}
+
+.admin-testimonials table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-testimonials th,
+.admin-testimonials td {
+  border: 1px solid #eee;
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-testimonials th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: #b02a37;
+}

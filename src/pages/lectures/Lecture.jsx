@@ -75,48 +75,79 @@ const Lecture = ({ user }) => {
   };
 
   const submitHandler = async (e) => {
-    e.preventDefault();
-    setBtnLoading(true);
+  e.preventDefault();
+  setBtnLoading(true);
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    if (file) formData.append("file", file);
+  try {
+    let uploadedFileUrl = null;
+    let fileType = "";
 
-    try {
-      let res;
-      if (isEditMode) {
-        res = await axios.put(`${server}/api/lecture/${editingLectureId}`, formData, {
-          headers: { token: localStorage.getItem("token") }
+    if (file) {
+      if (file.type.startsWith("video")) {
+        // 🔹 Upload videos to Cloudinary
+        const sigRes = await axios.get(`${server}/api/cloudinary-signature`, {
+          headers: { token: localStorage.getItem("token") },
         });
 
-        setLectures(prev =>
-          prev.map(lec => (lec._id === editingLectureId ? res.data.lecture : lec))
-        );
-        fetchLecture(editingLectureId);
-      } else {
-        res = await axios.post(`${server}/api/course/${params.id}`, formData, {
-          headers: { token: localStorage.getItem("token") }
+        const { signature, timestamp, apiKey, cloudName } = sigRes.data;
+        const formDataCloud = new FormData();
+        formDataCloud.append("file", file);
+        formDataCloud.append("api_key", apiKey);
+        formDataCloud.append("timestamp", timestamp);
+        formDataCloud.append("signature", signature);
+
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+        const uploadRes = await axios.post(uploadUrl, formDataCloud);
+
+        uploadedFileUrl = uploadRes.data.secure_url;
+        fileType = "video";
+      } 
+      else if (file.type === "application/pdf") {
+        // 🔹 Upload PDFs using multer
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await axios.post(`${server}/api/upload-pdf`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
-        setLectures(prev => [...prev, res.data.lecture]);
-        fetchLecture(res.data.lecture._id);
+        uploadedFileUrl = `${server}${uploadRes.data.fileUrl}`;
+        fileType = "pdf";
+      } 
+      else {
+        toast.error("Unsupported file type");
+        return;
       }
-
-      toast.success(res.data.message);
-      setTitle("");
-      setDescription("");
-      setFile(null);
-      setFilePreview("");
-      setShow(false);
-      setIsEditMode(false);
-      setEditingLectureId("");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Upload failed");
-    } finally {
-      setBtnLoading(false);
     }
-  };
+
+    const payload = { title, description, file: uploadedFileUrl, fileType };
+
+    let res;
+    if (isEditMode) {
+      res = await axios.put(
+        `${server}/api/lecture/${editingLectureId}`,
+        payload,
+        { headers: { token: localStorage.getItem("token") } }
+      );
+    } else {
+      res = await axios.post(`${server}/api/course/${params.id}`, payload, {
+        headers: { token: localStorage.getItem("token") },
+      });
+    }
+
+    toast.success(res.data.message);
+    fetchLectures();
+    setShow(false);
+    setIsEditMode(false);
+    setFile(null);
+    setFilePreview("");
+  } catch (err) {
+    console.error("Upload Error:", err);
+    toast.error(err.response?.data?.message || "Upload failed");
+  } finally {
+    setBtnLoading(false);
+  }
+};
 
   const deleteHandler = async (id) => {
     if (window.confirm("Delete this lecture?")) {
@@ -149,7 +180,7 @@ const Lecture = ({ user }) => {
                   <>
                     {lecture.fileType === "video" ? (
                       <video
-                        src={`${server}/${lecture.file}`}
+                        src={`${lecture.file}`}
                         width="100%"
                         controls
                         controlsList="nodownload fullscreen"
@@ -158,7 +189,7 @@ const Lecture = ({ user }) => {
                       />
                     ) : lecture.fileType === "pdf" ? (
                       <iframe
-                        src={`${server}/${lecture.file}`}
+                        src={`${lecture.file}`}
                         title="PDF"
                         width="100%"
                         height="500px"
